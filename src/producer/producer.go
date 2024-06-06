@@ -6,9 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"leukocyte/src/config"
 	"leukocyte/src/logger"
 	rabbitMQ "leukocyte/src/message_queue/rabbitmq"
 	"leukocyte/src/producer/service"
+
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -27,8 +30,12 @@ func main() {
 		panic(err)
 	}
 
-	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, "amqp://rabbitmq:rabbitmq@localhost:5672/")
-	s := service.NewProducer(ctx, logger.Entry, mq)
+	if err := config.ReadConfig(); err != nil {
+		logger.Entry.Fatal("Failed to read config file", zap.Error(err))
+	}
+
+	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, config.Cfg.MessageQueue.Url)
+	s := service.NewProducer(ctx, logger.Entry, mq, config.Cfg.MessageQueue.RoutingKey)
 
 	s.Start()
 

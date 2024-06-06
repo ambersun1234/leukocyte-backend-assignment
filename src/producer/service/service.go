@@ -18,14 +18,18 @@ type Producer struct {
 	ctx          context.Context
 	messageQueue queue.Queue
 	ticker       *time.Ticker
+	routingKey   string
 }
 
-func NewProducer(ctx context.Context, logger *zap.Logger, messageQueue queue.Queue) *Producer {
+func NewProducer(
+	ctx context.Context, logger *zap.Logger,
+	messageQueue queue.Queue, routingKey string) *Producer {
 	return &Producer{
 		logger:       logger,
 		ctx:          ctx,
 		messageQueue: messageQueue,
 		ticker:       time.NewTicker(10 * time.Second),
+		routingKey:   routingKey,
 	}
 }
 
@@ -52,7 +56,7 @@ func (p *Producer) Start() {
 			}
 
 			p.logger.Info("Publishing message...")
-			if err := p.messageQueue.Publish("test", string(jobBytes)); err != nil {
+			if err := p.messageQueue.Publish(p.routingKey, string(jobBytes)); err != nil {
 				p.logger.Error("Failed to publish message", zap.Error(err))
 			}
 

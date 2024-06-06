@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"leukocyte/src/config"
 	"leukocyte/src/consumer/service"
 	"leukocyte/src/container/k8s"
 	"leukocyte/src/logger"
@@ -30,9 +31,13 @@ func main() {
 		panic(err)
 	}
 
-	container := k8s.NewK8s(logger.Entry, "~/.kube/config")
-	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, "amqp://rabbitmq:rabbitmq@localhost:5672/")
-	s := service.NewConsumer(logger.Entry, container, mq)
+	if err := config.ReadConfig(); err != nil {
+		logger.Entry.Fatal("Failed to read config file", zap.Error(err))
+	}
+
+	container := k8s.NewK8s(logger.Entry, config.Cfg.Kubernetes.ConfigUrl)
+	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, config.Cfg.MessageQueue.Url)
+	s := service.NewConsumer(logger.Entry, container, mq, config.Cfg.MessageQueue.RoutingKey)
 
 	if err := s.Start(); err != nil {
 		logger.Entry.Fatal("Failed to start consumer", zap.Error(err))

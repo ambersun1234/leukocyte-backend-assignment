@@ -24,6 +24,7 @@ type K8s struct {
 
 func NewK8s(logger *zap.Logger, configPath string) *K8s {
 	var kubeconfig *string
+
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
@@ -48,7 +49,7 @@ func NewK8s(logger *zap.Logger, configPath string) *K8s {
 }
 
 func (k *K8s) Schedule(data types.JobObject) error {
-	jobsClient := k.clientset.BatchV1().Jobs(data.Namespace)
+	jobsClient := k.clientset.BatchV1().Jobs("default")
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: data.Name,

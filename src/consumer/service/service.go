@@ -16,13 +16,17 @@ type Consumer struct {
 
 	container    container.Container
 	messageQueue queue.Queue
+	routingKey   string
 }
 
-func NewConsumer(logger *zap.Logger, c container.Container, queue queue.Queue) *Consumer {
+func NewConsumer(
+	logger *zap.Logger, c container.Container,
+	queue queue.Queue, routingKey string) *Consumer {
 	return &Consumer{
 		logger:       logger,
 		container:    c,
 		messageQueue: queue,
+		routingKey:   routingKey,
 	}
 }
 
@@ -44,7 +48,7 @@ func (c *Consumer) Worker(data string) error {
 }
 
 func (c *Consumer) Start() error {
-	if err := c.messageQueue.Consume("test", c.Worker); err != nil {
+	if err := c.messageQueue.Consume(c.routingKey, c.Worker); err != nil {
 		c.logger.Error("Failed to consume message", zap.Error(err))
 
 		return err
