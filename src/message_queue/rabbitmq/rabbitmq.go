@@ -6,6 +6,7 @@ import (
 
 	"leukocyte/src/types"
 
+	"github.com/avast/retry-go"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
@@ -39,9 +40,12 @@ func (mq *RabbitMQ) Publish(key, data string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := mq.ch.PublishWithContext(
-		ctx, "", key, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(data)},
-	)
+	err := retry.Do(func() error {
+		return mq.ch.PublishWithContext(
+			ctx, "", key, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(data)},
+		)
+	}, retry.Attempts(3))
+
 	if err != nil {
 		mq.logger.Error("Failed to publish message", zap.Error(err))
 
