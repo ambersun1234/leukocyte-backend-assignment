@@ -7,4 +7,5 @@ import (
 type Queue interface {
 	Publish(string, string) error
 	Consume(string, types.CallbackFunc) error
+	Close() error
 }

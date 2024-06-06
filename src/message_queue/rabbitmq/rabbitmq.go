@@ -14,11 +14,12 @@ import (
 type RabbitMQ struct {
 	logger *zap.Logger
 
+	ctx  context.Context
 	ch   *amqp.Channel
 	conn *amqp.Connection
 }
 
-func NewRabbitMQ(logger *zap.Logger, connectionStr string) *RabbitMQ {
+func NewRabbitMQ(ctx context.Context, logger *zap.Logger, connectionStr string) *RabbitMQ {
 	conn, err := amqp.Dial(connectionStr)
 	if err != nil {
 		logger.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
@@ -31,9 +32,24 @@ func NewRabbitMQ(logger *zap.Logger, connectionStr string) *RabbitMQ {
 
 	return &RabbitMQ{
 		logger: logger,
+		ctx:    ctx,
 		ch:     ch,
 		conn:   conn,
 	}
+}
+
+func (mq *RabbitMQ) Close() error {
+	if err := mq.ch.Close(); err != nil {
+		mq.logger.Error("Failed to close channel", zap.Error(err))
+		return err
+	}
+
+	if err := mq.conn.Close(); err != nil {
+		mq.logger.Error("Failed to close connection", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (mq *RabbitMQ) Publish(key, data string) error {
@@ -65,15 +81,19 @@ func (mq *RabbitMQ) Consume(key string, callback types.CallbackFunc) error {
 		return err
 	}
 
-	for msg := range queue {
-		mq.logger.Debug("Received message", zap.String("body", string(msg.Body)))
+	for {
+		select {
+		case <-mq.ctx.Done():
+			return nil
 
-		if err := callback(string(msg.Body)); err != nil {
-			mq.logger.Error("Failed to process message", zap.Error(err))
+		case msg := <-queue:
+			mq.logger.Debug("Received message", zap.String("body", string(msg.Body)))
 
-			continue
+			if err := callback(string(msg.Body)); err != nil {
+				mq.logger.Error("Failed to process message", zap.Error(err))
+
+				continue
+			}
 		}
 	}
-
-	return nil
 }
