@@ -72,14 +72,14 @@ func (mq *RabbitMQ) Close() error {
 }
 
 func (mq *RabbitMQ) Publish(key, data string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	err := retry.Do(func() error {
 		if err := mq.Connect(); err != nil {
 			mq.logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
 			return err
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
 		return mq.ch.PublishWithContext(
 			ctx, "", key, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(data)},

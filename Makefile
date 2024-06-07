@@ -1,8 +1,8 @@
 producer:
-	go run src/producer/producer.go
+	@go run src/producer/producer.go
 
 consumer:
-	go run src/consumer/consumer.go
+	@go run src/consumer/consumer.go
 
 message-queue:
 	docker run -d \
@@ -13,8 +13,14 @@ message-queue:
 		--name rabbitmq \
 		rabbitmq:3.13-rc-management
 
+minikube-delete-restart:
+	@minikube delete
+	@minikube start
+
 fmt:
 	@go fmt ./...
 
 check:
 	@golangci-lint run
+
+.PHONY: fmt check producer consumer message-queue

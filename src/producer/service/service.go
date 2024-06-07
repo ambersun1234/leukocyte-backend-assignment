@@ -53,11 +53,13 @@ func (p *Producer) Start() {
 			jobBytes, err := json.Marshal(job)
 			if err != nil {
 				p.logger.Error("Failed to marshal job", zap.Error(err))
+				continue
 			}
 
 			p.logger.Info("Publishing message...")
 			if err := p.messageQueue.Publish(p.routingKey, string(jobBytes)); err != nil {
 				p.logger.Error("Failed to publish message", zap.Error(err))
+				continue
 			}
 
 			counter += 1

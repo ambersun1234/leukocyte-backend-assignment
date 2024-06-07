@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"leukocyte/src/container"
 	queue "leukocyte/src/message_queue"
+	"leukocyte/src/orchestration"
 	"leukocyte/src/types"
 
 	"go.uber.org/zap"
@@ -14,17 +14,17 @@ import (
 type Consumer struct {
 	logger *zap.Logger
 
-	container    container.Container
+	orch         orchestration.Orchestration
 	messageQueue queue.Queue
 	routingKey   string
 }
 
 func NewConsumer(
-	logger *zap.Logger, c container.Container,
+	logger *zap.Logger, o orchestration.Orchestration,
 	queue queue.Queue, routingKey string) *Consumer {
 	return &Consumer{
 		logger:       logger,
-		container:    c,
+		orch:         o,
 		messageQueue: queue,
 		routingKey:   routingKey,
 	}
@@ -51,18 +51,20 @@ func (c *Consumer) Worker(data string) error {
 		goto reenqueue
 	}
 
-	if err = c.container.Schedule(obj); err != nil {
+	if err = c.orch.Schedule(obj); err != nil {
 		c.logger.Error("Failed to schedule job", zap.Error(err))
 		goto reenqueue
 	}
 
-	return nil
+	goto success
 
 reenqueue:
 	if err = c.enqueue(data); err != nil {
 		c.logger.Error("Failed to re enqueue message", zap.Error(err))
 		return err
 	}
+
+success:
 	return nil
 }
 

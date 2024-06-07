@@ -8,9 +8,9 @@ import (
 
 	"leukocyte/src/config"
 	"leukocyte/src/consumer/service"
-	"leukocyte/src/container/k8s"
 	"leukocyte/src/logger"
 	rabbitMQ "leukocyte/src/message_queue/rabbitmq"
+	"leukocyte/src/orchestration/k8s"
 
 	"go.uber.org/zap"
 )

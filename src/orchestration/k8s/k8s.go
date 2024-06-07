@@ -73,9 +73,11 @@ func (k *K8s) Schedule(data types.JobObject) error {
 	result, err := jobsClient.Create(context.TODO(), job, metav1.CreateOptions{})
 	if err != nil {
 		k.logger.Error("Failed to create job", zap.Error(err))
+
 		return err
 	}
 
 	k.logger.Info("Created job", zap.String("job", string(result.GetObjectMeta().GetUID())))
+
 	return nil
 }

@@ -1,9 +1,9 @@
-package container
+package orchestration
 
 import (
 	"leukocyte/src/types"
 )
 
-type Container interface {
+type Orchestration interface {
 	Schedule(types.JobObject) error
 }
