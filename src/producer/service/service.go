@@ -33,6 +33,30 @@ func NewProducer(
 	}
 }
 
+func (p *Producer) produce(counter int) error {
+	job := &types.JobObject{
+		Namespace:     "default",
+		Name:          fmt.Sprintf("job-%d", counter),
+		Image:         "ubuntu",
+		RestartPolicy: "Never",
+		Commands:      []string{"echo", fmt.Sprintf("hello world %v !\n", counter)},
+	}
+
+	jobBytes, err := json.Marshal(job)
+	if err != nil {
+		p.logger.Error("Failed to marshal job", zap.Error(err))
+		return err
+	}
+
+	p.logger.Info("Publishing message...")
+	if err := p.messageQueue.Publish(p.routingKey, string(jobBytes)); err != nil {
+		p.logger.Error("Failed to publish message", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
 func (p *Producer) Start() {
 	counter := 0
 
@@ -42,24 +66,8 @@ func (p *Producer) Start() {
 			return
 
 		case <-p.ticker.C:
-			job := &types.JobObject{
-				Namespace:     "default",
-				Name:          fmt.Sprintf("job-%d", counter),
-				Image:         "ubuntu",
-				RestartPolicy: "Never",
-				Commands:      []string{"echo", fmt.Sprintf("hello world %v !\n", counter)},
-			}
-
-			jobBytes, err := json.Marshal(job)
-			if err != nil {
-				p.logger.Error("Failed to marshal job", zap.Error(err))
-				continue
-			}
-
-			p.logger.Info("Publishing message...")
-			if err := p.messageQueue.Publish(p.routingKey, string(jobBytes)); err != nil {
-				p.logger.Error("Failed to publish message", zap.Error(err))
-				continue
+			if err := p.produce(counter); err != nil {
+				p.logger.Error("Failed to produce message", zap.Error(err))
 			}
 
 			counter += 1
