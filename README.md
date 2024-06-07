@@ -26,6 +26,11 @@ $ make producer
 $ make consumer
 ```
 
+## Test
+```shell
+$ make test
+```
+
 ## Check List
 + [x] producer
     + [x] should publish message to message queue
@@ -38,7 +43,7 @@ $ make consumer
     + [x] should implement auto-recovery mechanism
 + [x] kubernetes
     + [x] should schedule job from job queue
-+ [ ] unit test
++ [x] unit test
 + [ ] docker-compose
 
 ## Author
