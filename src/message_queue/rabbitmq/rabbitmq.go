@@ -14,28 +14,44 @@ import (
 type RabbitMQ struct {
 	logger *zap.Logger
 
-	ctx  context.Context
-	ch   *amqp.Channel
-	conn *amqp.Connection
+	connectionStr string
+	ctx           context.Context
+	ch            *amqp.Channel
+	conn          *amqp.Connection
 }
 
 func NewRabbitMQ(ctx context.Context, logger *zap.Logger, connectionStr string) *RabbitMQ {
-	conn, err := amqp.Dial(connectionStr)
+	return &RabbitMQ{
+		logger:        logger,
+		connectionStr: connectionStr,
+		ctx:           ctx,
+		ch:            nil,
+		conn:          nil,
+	}
+}
+
+func (mq *RabbitMQ) Connect() error {
+	if mq.ch != nil || mq.conn != nil {
+		// if already connected, do nothing
+		return nil
+	}
+
+	conn, err := amqp.Dial(mq.connectionStr)
 	if err != nil {
-		logger.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
+		mq.logger.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
+		return err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		logger.Fatal("Failed to open a channel", zap.Error(err))
+		mq.logger.Fatal("Failed to open a channel", zap.Error(err))
+		return err
 	}
 
-	return &RabbitMQ{
-		logger: logger,
-		ctx:    ctx,
-		ch:     ch,
-		conn:   conn,
-	}
+	mq.ch = ch
+	mq.conn = conn
+
+	return nil
 }
 
 func (mq *RabbitMQ) Close() error {
@@ -49,6 +65,9 @@ func (mq *RabbitMQ) Close() error {
 		return err
 	}
 
+	mq.ch = nil
+	mq.conn = nil
+
 	return nil
 }
 
@@ -57,6 +76,11 @@ func (mq *RabbitMQ) Publish(key, data string) error {
 	defer cancel()
 
 	err := retry.Do(func() error {
+		if err := mq.Connect(); err != nil {
+			mq.logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
+			return err
+		}
+
 		return mq.ch.PublishWithContext(
 			ctx, "", key, false, false, amqp.Publishing{ContentType: "text/plain", Body: []byte(data)},
 		)
@@ -74,6 +98,12 @@ func (mq *RabbitMQ) Publish(key, data string) error {
 }
 
 func (mq *RabbitMQ) Consume(key string, callback types.CallbackFunc) error {
+	if err := mq.Connect(); err != nil {
+		mq.logger.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
+
+		return err
+	}
+
 	queue, err := mq.ch.Consume(key, "", true, false, false, false, nil)
 	if err != nil {
 		mq.logger.Error("Failed to consume from queue", zap.Error(err))
@@ -91,8 +121,6 @@ func (mq *RabbitMQ) Consume(key string, callback types.CallbackFunc) error {
 
 			if err := callback(string(msg.Body)); err != nil {
 				mq.logger.Error("Failed to process message", zap.Error(err))
-
-				continue
 			}
 		}
 	}

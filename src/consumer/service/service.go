@@ -30,20 +30,39 @@ func NewConsumer(
 	}
 }
 
+func (c *Consumer) enqueue(data string) error {
+	if err := c.messageQueue.Publish(c.routingKey, data); err != nil {
+		c.logger.Error("Failed to re enqueue message", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
 func (c *Consumer) Worker(data string) error {
 	c.logger.Info(fmt.Sprintf("Received message: %s", data))
 
-	obj := &types.JobObject{}
-	if err := json.Unmarshal([]byte(data), obj); err != nil {
+	var (
+		err error
+		obj types.JobObject
+	)
+	if err = json.Unmarshal([]byte(data), &obj); err != nil {
 		c.logger.Error("Failed to unmarshal job", zap.Error(err))
-		return err
+		goto reenqueue
 	}
 
-	if err := c.container.Schedule(*obj); err != nil {
+	if err = c.container.Schedule(obj); err != nil {
 		c.logger.Error("Failed to schedule job", zap.Error(err))
-		return err
+		goto reenqueue
 	}
 
+	return nil
+
+reenqueue:
+	if err = c.enqueue(data); err != nil {
+		c.logger.Error("Failed to re enqueue message", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
