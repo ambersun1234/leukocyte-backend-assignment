@@ -11,7 +11,6 @@ Please refer to [spec](./面試作業.pdf) for more detail
 
 ## Prerequisites
 + [Docker](https://www.docker.com/)
-+ [Docker-compose](https://docs.docker.com/compose/)
 + [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download)
 
 ## Config
@@ -24,6 +23,13 @@ $ make message-queue
 $ make minikube-delete-restart
 $ make producer
 $ make consumer
+```
+
+> This approach will run the application code outside kubernetes
+
+### Auto
+```shell
+$ make deploy-minikube
 ```
 
 ## Test
@@ -44,7 +50,7 @@ $ make test
 + [x] kubernetes
     + [x] should schedule job from job queue
 + [x] unit test
-+ [ ] docker-compose
++ [x] minikube
 
 ## Author
 + [ambersun1234](https://github.com/ambersun1234)

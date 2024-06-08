@@ -13,6 +13,7 @@ var (
 
 type Kubernetes struct {
 	ConfigUrl string `mapstructure:"config_url"`
+	InCluster bool   `mapstructure:"in_cluster"`
 }
 
 type MessageQueue struct {

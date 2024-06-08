@@ -1,3 +1,6 @@
+PRODUCER_IMAGE=assignment-producer
+CONSUMER_IMAGE=assignment-consumer
+
 producer:
 	@go run src/producer/producer.go
 
@@ -29,4 +32,16 @@ generate:
 test: generate
 	@go test ./... -cover -v -race
 
-.PHONY: fmt check producer consumer message-queue minikube-delete-restart generate test
+build-image: Dockerfile.producer Dockerfile.consumer
+	@docker build -t $(PRODUCER_IMAGE) -f ./Dockerfile.producer .
+	@docker build -t $(CONSUMER_IMAGE) -f ./Dockerfile.consumer .
+
+deploy-minikube: build-image
+	@minikube start
+	@minikube image load $(PRODUCER_IMAGE)
+	@minikube image load $(CONSUMER_IMAGE)
+	@kubectl apply -f ./kubernetes/services
+	@kubectl apply -f ./kubernetes/deployments
+	@kubectl apply -f ./kubernetes/permissions
+
+.PHONY: fmt check producer consumer message-queue minikube-delete-restart generate test build-image deploy-minikube

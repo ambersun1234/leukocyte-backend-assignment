@@ -35,7 +35,7 @@ func main() {
 		logger.Entry.Fatal("Failed to read config file", zap.Error(err))
 	}
 
-	container := k8s.NewK8s(logger.Entry, config.Cfg.Kubernetes.ConfigUrl)
+	container := k8s.NewK8s(logger.Entry, config.Cfg.Kubernetes.InCluster, config.Cfg.Kubernetes.ConfigUrl)
 	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, config.Cfg.MessageQueue.Url)
 	s := service.NewConsumer(logger.Entry, container, mq, config.Cfg.MessageQueue.RoutingKey)
 
