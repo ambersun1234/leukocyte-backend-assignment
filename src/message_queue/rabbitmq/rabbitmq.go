@@ -30,6 +30,16 @@ func NewRabbitMQ(ctx context.Context, logger *zap.Logger, connectionStr string) 
 	}
 }
 
+func (mq *RabbitMQ) declareQueue(key string) error {
+	if _, err := mq.ch.QueueDeclare(key, false, false, false, false, nil); err != nil {
+		mq.logger.Error("Failed to declare queue", zap.Error(err))
+
+		return err
+	}
+
+	return nil
+}
+
 func (mq *RabbitMQ) Connect() error {
 	if mq.ch != nil || mq.conn != nil {
 		// if already connected, do nothing
@@ -75,6 +85,11 @@ func (mq *RabbitMQ) Publish(key, data string) error {
 	err := retry.Do(func() error {
 		if err := mq.Connect(); err != nil {
 			mq.logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
+			return err
+		}
+
+		if err := mq.declareQueue(key); err != nil {
+			mq.logger.Error("Failed to declare queue", zap.Error(err))
 			return err
 		}
 
