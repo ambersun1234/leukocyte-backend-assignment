@@ -12,11 +12,20 @@ spec:
       labels:
         app: producer
     spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup rabbitmq-service; do echo waiting for rabbitmq-service; sleep 2; done",
+            ]
       containers:
-      - name: producer
-        image: assignment-producer
-        imagePullPolicy: Never
-        resources:
-          limits:
-            memory: 4096Mi
-            cpu: 1000m
+        - name: producer
+          image: assignment-producer
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: 4096Mi
+              cpu: 1000m

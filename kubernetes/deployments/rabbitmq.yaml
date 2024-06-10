@@ -13,23 +13,29 @@ spec:
         app: rabbitmq
     spec:
       containers:
-      - name: rabbitmq
-        image: rabbitmq:latest
-        ports:
-        - containerPort: 5672
-        - containerPort: 15672
-        env:
-          - name: RABBITMQ_DEFAULT_USER
-            value: "test"
-          - name: RABBITMQ_DEFAULT_PASS
-            value: "test"
-        resources:
-          limits:
-            memory: 4096Mi
-            cpu: 1000m
-        livenessProbe:
-          tcpSocket:
-            port: 5672
-          initialDelaySeconds: 30
-          periodSeconds: 20
-          failureThreshold: 3
+        - name: rabbitmq
+          image: rabbitmq:latest
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: username
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: password
+          resources:
+            limits:
+              memory: 4096Mi
+              cpu: 1000m
+          livenessProbe:
+            tcpSocket:
+              port: 5672
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3

@@ -43,5 +43,6 @@ deploy-minikube: build-image
 	@kubectl apply -f ./kubernetes/services
 	@kubectl apply -f ./kubernetes/deployments
 	@kubectl apply -f ./kubernetes/permissions
+	@kubectl apply -f ./kubernetes/secrets
 
 .PHONY: fmt check producer consumer message-queue minikube-delete-restart generate test build-image deploy-minikube
