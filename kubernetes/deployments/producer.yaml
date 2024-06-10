@@ -25,7 +25,14 @@ spec:
         - name: producer
           image: assignment-producer
           imagePullPolicy: Never
+          envFrom:
+            - configMapRef:
+                name: myconfig
           resources:
             limits:
               memory: 4096Mi
               cpu: 1000m
+      volumes:
+        - name: config-volume
+          configMap:
+            name: myconfig

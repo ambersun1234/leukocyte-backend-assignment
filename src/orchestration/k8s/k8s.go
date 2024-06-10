@@ -2,8 +2,6 @@ package k8s
 
 import (
 	"context"
-	"flag"
-	"path/filepath"
 
 	"leukocyte/src/types"
 
@@ -13,8 +11,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 type K8s struct {
@@ -23,8 +19,8 @@ type K8s struct {
 	clientset *kubernetes.Clientset
 }
 
-func NewK8s(logger *zap.Logger, inCluster bool, configPath string) *K8s {
-	clientset, err := kubernetes.NewForConfig(readK8sConfig(logger, inCluster, configPath))
+func NewK8s(logger *zap.Logger) *K8s {
+	clientset, err := kubernetes.NewForConfig(readK8sConfig(logger))
 	if err != nil {
 		logger.Fatal("Failed to create clientset", zap.Error(err))
 	}
@@ -35,30 +31,11 @@ func NewK8s(logger *zap.Logger, inCluster bool, configPath string) *K8s {
 	}
 }
 
-func readK8sConfig(logger *zap.Logger, inCluster bool, configPath string) *rest.Config {
-	if inCluster {
-		config, err := rest.InClusterConfig()
-		if err != nil {
-			logger.Fatal("Failed to build config", zap.Error(err))
-		}
-		return config
-	}
-
-	// access kubernetes from outside
-	var kubeconfig *string
-
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", configPath, "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+func readK8sConfig(logger *zap.Logger) *rest.Config {
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		logger.Fatal("Failed to build config", zap.Error(err))
 	}
-
 	return config
 }
 

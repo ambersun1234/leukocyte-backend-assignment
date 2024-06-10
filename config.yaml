@@ -1,5 +1,0 @@
-kubernetes:
-  in_cluster: false
-message_queue:
-  url: amqp://rabbitmq:rabbitmq@localhost:5672/
-  routing_key: test

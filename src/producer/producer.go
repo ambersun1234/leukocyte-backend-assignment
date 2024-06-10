@@ -34,8 +34,8 @@ func main() {
 		logger.Entry.Fatal("Failed to read config file", zap.Error(err))
 	}
 
-	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, config.Cfg.MessageQueue.Url)
-	s := service.NewProducer(ctx, logger.Entry, mq, config.Cfg.MessageQueue.RoutingKey)
+	mq := rabbitMQ.NewRabbitMQ(ctx, logger.Entry, config.Cfg.MqURL)
+	s := service.NewProducer(ctx, logger.Entry, mq, config.Cfg.MqRoutingKey)
 
 	s.Start()
 

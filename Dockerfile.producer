@@ -8,5 +8,4 @@ FROM alpine:latest AS final_layer
 
 WORKDIR /app
 COPY --from=build_layer /app/producer .
-COPY --from=build_layer /app/config.yaml.minikube ./config.yaml
 CMD ["/app/producer"]

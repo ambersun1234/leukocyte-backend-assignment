@@ -1,44 +1,24 @@
 package config
 
 import (
-	"leukocyte/src/logger"
-
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 var (
 	Cfg *Config
 )
 
-type Kubernetes struct {
-	ConfigUrl string `mapstructure:"config_url"`
-	InCluster bool   `mapstructure:"in_cluster"`
-}
-
-type MessageQueue struct {
-	Url        string `mapstructure:"url"`
-	RoutingKey string `mapstructure:"routing_key"`
-}
-
 type Config struct {
-	Kubernetes   Kubernetes   `mapstructure:"kubernetes"`
-	MessageQueue MessageQueue `mapstructure:"message_queue"`
+	MqURL        string `mapstructure:"MQ_URL"`
+	MqRoutingKey string `mapstructure:"MQ_ROUTING_KEY"`
 }
 
 func ReadConfig() error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		logger.Entry.Error("Error reading config file.", zap.Error(err))
-		return err
-	}
-
-	if err := viper.Unmarshal(&Cfg); err != nil {
-		logger.Entry.Error("Unable to decode into struct.", zap.Error(err))
-		return err
+	Cfg = &Config{
+		MqURL:        viper.GetString("MQ_URL"),
+		MqRoutingKey: viper.GetString("MQ_ROUTING_KEY"),
 	}
 
 	return nil

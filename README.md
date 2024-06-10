@@ -18,17 +18,6 @@ Please refer to [spec](./面試作業.pdf) for more detail
 You can change the config in [./config.yaml](./config.yaml), or keep the default one
 
 ## Run
-### Manual
-```shell
-$ make message-queue
-$ make minikube-delete-restart
-$ make producer
-$ make consumer
-```
-
-> This approach will run the application code outside kubernetes
-
-### Auto
 ```shell
 $ make deploy-minikube
 ```

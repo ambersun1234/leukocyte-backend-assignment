@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myconfig
+data:
+  MQ_URL: amqp://test:test@rabbitmq-service:5672/
+  MQ_ROUTING_KEY: test
