@@ -16,12 +16,12 @@ type Consumer struct {
 
 	orch         orchestration.Orchestration
 	messageQueue queue.Queue
-	routingKey   string
+	routingKey   types.RoutingKey
 }
 
 func NewConsumer(
 	logger *zap.Logger, o orchestration.Orchestration,
-	queue queue.Queue, routingKey string) *Consumer {
+	queue queue.Queue, routingKey types.RoutingKey) *Consumer {
 	return &Consumer{
 		logger:       logger,
 		orch:         o,

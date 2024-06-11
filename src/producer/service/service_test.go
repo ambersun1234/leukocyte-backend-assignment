@@ -7,6 +7,7 @@ import (
 
 	"leukocyte/src/logger"
 	"leukocyte/src/message_queue/mocks"
+	"leukocyte/src/types"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +16,7 @@ import (
 type TestProducerSuite struct {
 	suite.Suite
 
-	routingKey string
+	routingKey types.RoutingKey
 	producer   *Producer
 	mq         *mocks.Queue
 }

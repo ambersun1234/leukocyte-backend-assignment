@@ -9,3 +9,5 @@ type JobObject struct {
 	RestartPolicy string
 	Commands      []string
 }
+
+type RoutingKey = string

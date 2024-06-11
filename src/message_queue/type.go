@@ -6,8 +6,8 @@ import (
 
 //go:generate mockery --name Queue
 type Queue interface {
-	Publish(string, string) error
-	Consume(string, types.CallbackFunc) error
+	Publish(types.RoutingKey, string) error
+	Consume(types.RoutingKey, types.CallbackFunc) error
 	Connect() error
 	Close() error
 }

@@ -18,12 +18,12 @@ type Producer struct {
 	ctx          context.Context
 	messageQueue queue.Queue
 	ticker       *time.Ticker
-	routingKey   string
+	routingKey   types.RoutingKey
 }
 
 func NewProducer(
 	ctx context.Context, logger *zap.Logger,
-	messageQueue queue.Queue, routingKey string) *Producer {
+	messageQueue queue.Queue, routingKey types.RoutingKey) *Producer {
 	return &Producer{
 		logger:       logger,
 		ctx:          ctx,

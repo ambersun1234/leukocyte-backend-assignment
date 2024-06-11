@@ -30,7 +30,7 @@ func NewRabbitMQ(ctx context.Context, logger *zap.Logger, connectionStr string) 
 	}
 }
 
-func (mq *RabbitMQ) declareQueue(key string) error {
+func (mq *RabbitMQ) declareQueue(key types.RoutingKey) error {
 	if _, err := mq.ch.QueueDeclare(key, false, false, false, false, nil); err != nil {
 		mq.logger.Error("Failed to declare queue", zap.Error(err))
 
@@ -81,7 +81,7 @@ func (mq *RabbitMQ) Close() error {
 	return nil
 }
 
-func (mq *RabbitMQ) Publish(key, data string) error {
+func (mq *RabbitMQ) Publish(key types.RoutingKey, data string) error {
 	err := retry.Do(func() error {
 		if err := mq.Connect(); err != nil {
 			mq.logger.Error("Failed to connect to RabbitMQ", zap.Error(err))
@@ -112,7 +112,7 @@ func (mq *RabbitMQ) Publish(key, data string) error {
 	return nil
 }
 
-func (mq *RabbitMQ) Consume(key string, callback types.CallbackFunc) error {
+func (mq *RabbitMQ) Consume(key types.RoutingKey, callback types.CallbackFunc) error {
 	if err := mq.Connect(); err != nil {
 		mq.logger.Fatal("Failed to connect to RabbitMQ", zap.Error(err))
 

@@ -17,7 +17,7 @@ import (
 type TestConsumerSuite struct {
 	suite.Suite
 
-	routingKey string
+	routingKey types.RoutingKey
 	consumer   *Consumer
 	mq         *mockQueue.Queue
 	orch       *mockOrchestration.Orchestration
