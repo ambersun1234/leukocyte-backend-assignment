@@ -28,6 +28,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: myconfig
+            - secretRef:
+                name: application-credentials
           resources:
             limits:
               memory: 4096Mi

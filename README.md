@@ -14,9 +14,6 @@ Please refer to [spec](./面試作業.pdf) for more detail
 + [Kubectl](https://kubernetes.io/docs/reference/kubectl/)
 + [Minikube](https://minikube.sigs.k8s.io/docs/start/?arch=%2Flinux%2Fx86-64%2Fstable%2Fbinary+download)
 
-## Config
-You can change the config in [./config.yaml](./config.yaml), or keep the default one
-
 ## Run
 ```shell
 $ make deploy-minikube
