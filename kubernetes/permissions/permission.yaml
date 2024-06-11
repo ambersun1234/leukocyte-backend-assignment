@@ -7,7 +7,7 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: consumer
+  name: create-job-role
 rules:
   - apiGroups:
       - "batch"
@@ -28,4 +28,4 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: consumer
+  name: create-job-role

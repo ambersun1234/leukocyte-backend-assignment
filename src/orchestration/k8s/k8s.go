@@ -20,27 +20,28 @@ type K8s struct {
 }
 
 func NewK8s(logger *zap.Logger) *K8s {
-	clientset, err := kubernetes.NewForConfig(readK8sConfig(logger))
+	k := &K8s{logger: logger}
+
+	clientset, err := kubernetes.NewForConfig(k.readK8sConfig())
 	if err != nil {
 		logger.Fatal("Failed to create clientset", zap.Error(err))
 	}
 
-	return &K8s{
-		logger:    logger,
-		clientset: clientset,
-	}
+	k.clientset = clientset
+
+	return k
 }
 
-func readK8sConfig(logger *zap.Logger) *rest.Config {
+func (k *K8s) readK8sConfig() *rest.Config {
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		logger.Fatal("Failed to build config", zap.Error(err))
+		k.logger.Fatal("Failed to build config", zap.Error(err))
 	}
 	return config
 }
 
 func (k *K8s) Schedule(data types.JobObject) error {
-	jobsClient := k.clientset.BatchV1().Jobs("default")
+	jobsClient := k.clientset.BatchV1().Jobs(data.Namespace)
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: data.Name,

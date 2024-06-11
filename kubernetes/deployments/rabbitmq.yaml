@@ -37,5 +37,5 @@ spec:
             tcpSocket:
               port: 5672
             initialDelaySeconds: 30
-            periodSeconds: 20
+            periodSeconds: 5
             failureThreshold: 3

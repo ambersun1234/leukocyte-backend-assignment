@@ -18,7 +18,7 @@ build-image: Dockerfile.producer Dockerfile.consumer
 	@docker build -t $(CONSUMER_IMAGE) -f ./Dockerfile.consumer .
 
 deploy-minikube: build-image
-	@minikube start --memory 8192	
+	@minikube start
 	@minikube image load $(PRODUCER_IMAGE)
 	@minikube image load $(CONSUMER_IMAGE)
 	@kubectl apply -f ./kubernetes/configmaps

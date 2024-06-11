@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 
 	queue "leukocyte/src/message_queue"
 	"leukocyte/src/orchestration"
@@ -40,7 +39,7 @@ func (c *Consumer) enqueue(data string) error {
 }
 
 func (c *Consumer) Worker(data string) error {
-	c.logger.Info(fmt.Sprintf("Received message: %s", data))
+	c.logger.Info("Received message", zap.Any("data", data))
 
 	var (
 		err error
